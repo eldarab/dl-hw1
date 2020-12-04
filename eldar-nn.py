@@ -53,6 +53,7 @@ def ce_loss(x, y):
     loss = 0
     assert x.shape[0] == y.shape[0]  # make sure batch sizes are the same
     nll = - torch.log(softmax(x))
+    # loss = nll[[torch.arange(y.shape[0]), y]].sum()
     for prob, true_class in zip(nll, y):
         loss += prob[true_class]
     return loss / x.shape[0]
@@ -69,12 +70,10 @@ def eval_model(model, dataloader):
     if isinstance(model, torch.nn.Module):
         model.eval()
     loss, accuracy = 0, 0
-    temp_loss = 0
     for batch_idx, (x, y) in enumerate(dataloader):
         out = model(x.view(-1, 28 * 28))
         accuracy += accuracy_score(y, out.argmax(1))
         loss += F.cross_entropy(out, y)
-        temp_loss += ce_loss(out, y)
     return round(loss.item() / len(dataloader), 3), round(accuracy / len(dataloader), 3)
 
 
